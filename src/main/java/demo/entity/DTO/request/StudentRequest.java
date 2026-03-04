@@ -9,6 +9,7 @@ public record StudentRequest(
         String studentCode,
         @NotNull(message = "full name is not null")
         String fullName,
+        @NotNull(message = "email is not null")
         String email,
         LocalDate dateOfBirth,
         String major) {

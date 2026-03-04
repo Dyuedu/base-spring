@@ -18,7 +18,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleValidationException(MethodArgumentNotValidException ex) {
         Map<Integer, Error> errors = new HashMap<>();
         ex.getBindingResult().getFieldErrors().forEach(fieldError -> {
-            String fieldName = fieldError.getField();
+            String fieldName = extractFieldName(fieldError.getField());
             int index = extractIndex(fieldError.getField());
             String errorMessage = fieldError.getDefaultMessage();
 
@@ -30,6 +30,12 @@ public class GlobalExceptionHandler {
         ApiResponse<Void> apiResponse = ApiResponse.error(400, errorList);
         return ResponseEntity.badRequest().body(apiResponse);
     }
+    @ExceptionHandler(ResourceDuplicateException.class)
+    public ResponseEntity<?> DuplicateResourceHandler(ResourceDuplicateException ex) {
+
+        return ResponseEntity.badRequest().body(ex.getMessage());
+    }
+
 
     private int extractIndex(String fieldPath) {
         try {
@@ -43,5 +49,9 @@ public class GlobalExceptionHandler {
             return -1;
         }
         return -1;
+    }
+
+    private String extractFieldName(String fieldPath) {
+        return fieldPath.substring(fieldPath.lastIndexOf('.') + 1);
     }
 }

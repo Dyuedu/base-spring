@@ -2,6 +2,7 @@ package demo.service.Impl;
 
 import java.util.List;
 
+import demo.exception.EmailDuplicateException;
 import org.springframework.stereotype.Service;
 
 import demo.entity.Student;
@@ -22,6 +23,9 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public StudentResponse saveStudent(StudentRequest studentRequest) {
+        if (studentRepository.findByEmail(studentRequest.email()).isPresent()) {
+            throw new EmailDuplicateException();
+        }
         Student student = new Student();
         student.setStudent_code(studentRequest.studentCode());
         student.setFull_name(studentRequest.fullName());

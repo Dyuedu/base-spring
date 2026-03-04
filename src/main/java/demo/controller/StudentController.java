@@ -1,6 +1,9 @@
 package demo.controller;
 
 import demo.entity.DTO.request.ListStudentRequest;
+import demo.exception.ApiErrorException;
+import demo.exception.EmailDuplicateException;
+import demo.exception.ResourceDuplicateException;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -39,9 +42,17 @@ public class StudentController {
 
     @PostMapping()
     public ResponseEntity<ApiResponse<StudentResponse>> save(@RequestBody @Valid StudentRequest request) {
-        StudentResponse response = studentService.saveStudent(request);
-        ApiResponse<StudentResponse> apiResponse = ApiResponse.success(200, response);
-        return ResponseEntity.ok(apiResponse);
+        try {
+            StudentResponse response = studentService.saveStudent(request);
+            ApiResponse<StudentResponse> apiResponse = ApiResponse.success(200, response);
+            return ResponseEntity.ok(apiResponse);
+        } catch (EmailDuplicateException ex) {
+            System.out.println("DUPLICATE");
+            throw new ResourceDuplicateException("Resource duplicate", "Email is already in use");
+        } catch (Exception ex) {
+            System.out.println("EXCEPTION");
+            throw new ApiErrorException(ex.getMessage());
+        }
     }
 
     @GetMapping()
