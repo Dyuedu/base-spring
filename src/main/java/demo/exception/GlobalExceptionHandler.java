@@ -32,7 +32,6 @@ public class GlobalExceptionHandler {
     }
     @ExceptionHandler(ResourceDuplicateException.class)
     public ResponseEntity<?> DuplicateResourceHandler(ResourceDuplicateException ex) {
-
         return ResponseEntity.badRequest().body(ex.getMessage());
     }
 

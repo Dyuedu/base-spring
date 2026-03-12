@@ -2,6 +2,7 @@ package demo.service.Impl;
 
 import java.util.List;
 
+import demo.exception.CodeDuplicateException;
 import demo.exception.EmailDuplicateException;
 import org.springframework.stereotype.Service;
 
@@ -26,22 +27,26 @@ public class StudentServiceImpl implements StudentService {
         if (studentRepository.findByEmail(studentRequest.email()).isPresent()) {
             throw new EmailDuplicateException();
         }
-        Student student = new Student();
-        student.setStudent_code(studentRequest.studentCode());
-        student.setFull_name(studentRequest.fullName());
-        student.setEmail(studentRequest.email());
-        student.setDate_of_birth(studentRequest.dateOfBirth());
-        student.setMajor(studentRequest.major());
+
+        if (studentRepository.getStudentByStudentCode(studentRequest.studentCode()).isPresent()){
+            throw new CodeDuplicateException();
+        }
+        Student student = Student.builder()
+                .studentCode(studentRequest.studentCode())
+                .email(studentRequest.email())
+                .fullname(studentRequest.fullName())
+                .dateOfBirth(studentRequest.dateOfBirth())
+                .major(studentRequest.major())
+                .build();
         Student savedStudent = studentRepository.save(student);
 
-        StudentResponse studentResponse = new StudentResponse(
-                savedStudent.getId(),
-                savedStudent.getStudent_code(),
-                savedStudent.getFull_name(),
-                savedStudent.getEmail(),
-                savedStudent.getDate_of_birth(),
-                savedStudent.getMajor());
-        return studentResponse;
+        return StudentResponse.builder()
+                .id(savedStudent.getId())
+                .studentCode(savedStudent.getStudentCode())
+                .email(savedStudent.getEmail())
+                .fullName(savedStudent.getFullname())
+                .major(savedStudent.getMajor())
+                .build();
     }
 
     @Override
@@ -54,26 +59,28 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public List<StudentResponse> findAllStudents() {
         List<Student> students = studentRepository.findAll();
-        return students.stream().map(student -> new StudentResponse(
-                student.getId(),
-                student.getStudent_code(),
-                student.getFull_name(),
-                student.getEmail(),
-                student.getDate_of_birth(),
-                student.getMajor())).toList();
+        return students.stream().map(student -> StudentResponse.builder()
+                .id(student.getId())
+                .studentCode(student.getStudentCode())
+                .email(student.getEmail())
+                .fullName(student.getFullname())
+                .dateOfBirth(student.getDateOfBirth())
+                .major(student.getMajor())
+                .build()).toList();
     }
 
     @Override
     public StudentResponse findStudentById(Long id) {
         Student student = studentRepository.getStudentById(id)
                 .orElseThrow(() -> new StudentNotFoundException("Student not found with id: " + id));
-        return new StudentResponse(
-                student.getId(),
-                student.getStudent_code(),
-                student.getFull_name(),
-                student.getEmail(),
-                student.getDate_of_birth(),
-                student.getMajor());
+        return StudentResponse.builder()
+                .id(student.getId())
+                .studentCode(student.getStudentCode())
+                .email(student.getEmail())
+                .fullName(student.getFullname())
+                .dateOfBirth(student.getDateOfBirth())
+                .major(student.getMajor())
+                .build();
     }
 
     @Override
@@ -88,19 +95,20 @@ public class StudentServiceImpl implements StudentService {
     public StudentResponse updateStudent(Long id, StudentRequest studentRequest) {
         Student student = studentRepository.getStudentById(id)
                 .orElseThrow(() -> new StudentNotFoundException("Student not found with id: " + id));
-        student.setStudent_code(studentRequest.studentCode());
-        student.setFull_name(studentRequest.fullName());
+        student.setStudentCode(studentRequest.studentCode());
+        student.setFullname(studentRequest.fullName());
         student.setEmail(studentRequest.email());
-        student.setDate_of_birth(studentRequest.dateOfBirth());
+        student.setDateOfBirth(studentRequest.dateOfBirth());
         student.setMajor(studentRequest.major());
         Student updatedStudent = studentRepository.save(student);
-        return new StudentResponse(
-                updatedStudent.getId(),
-                updatedStudent.getStudent_code(),
-                updatedStudent.getFull_name(),
-                updatedStudent.getEmail(),
-                updatedStudent.getDate_of_birth(),
-                updatedStudent.getMajor());
+        return StudentResponse.builder()
+                .id(updatedStudent.getId())
+                .studentCode(updatedStudent.getStudentCode())
+                .email(updatedStudent.getEmail())
+                .fullName(updatedStudent.getFullname())
+                .dateOfBirth(updatedStudent.getDateOfBirth())
+                .major(updatedStudent.getMajor())
+                .build();
     }
 
 }
