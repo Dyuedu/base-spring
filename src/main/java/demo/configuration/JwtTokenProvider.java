@@ -1,15 +1,16 @@
 package demo.configuration;
 
 import demo.entity.Account;
+import demo.service.AccountService;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
@@ -20,26 +21,32 @@ import java.util.Map;
 
 @Component
 public class JwtTokenProvider {
-    private final UserDetailsService userDetailsService;
-
+    private final AccountService accountService;
     @Value("${app.jwt.secret}")
     private String jwtSecret;
     @Value("${app.jwt.expiration-ms}")
-    private long jwtExpirationMs;
+    private long   jwtExpirationMs;
 
-    public JwtTokenProvider(UserDetailsService userDetailsService) {
-        this.userDetailsService = userDetailsService;
+    public JwtTokenProvider(@Lazy AccountService accountService) {
+        this.accountService = accountService;
     }
 
     public String generateToken(Authentication auth) {
         Map<String, Object> claims = new HashMap<>();
         Account account = (Account) auth.getPrincipal();
         claims.put("role", account.getRole().getName());
-        return Jwts.builder().setSubject(auth.getName()).addClaims(claims).setIssuedAt(new Date()).setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs)).signWith(getSigningKey(), SignatureAlgorithm.HS256).compact();
+        return Jwts.builder()
+                .setSubject(auth.getName())
+                .addClaims(claims)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .compact();
     }
 
     public String getUsernameFromToken(String token) {
-        return Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(token).getBody().getSubject();
+        return Jwts.parserBuilder().setSigningKey(getSigningKey()).build()
+                .parseClaimsJws(token).getBody().getSubject();
     }
 
     public boolean validateToken(String token) {
@@ -55,9 +62,8 @@ public class JwtTokenProvider {
 
     public Authentication getAuthentication(String token) {
         String username = getUsernameFromToken(token);
-        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-        return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-
+        UserDetails userDetails = accountService.loadUserByUsername(username);
+        return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 
     private Key getSigningKey() {

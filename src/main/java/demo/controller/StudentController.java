@@ -5,6 +5,7 @@ import demo.exception.ApiErrorException;
 import demo.exception.CodeDuplicateException;
 import demo.exception.EmailDuplicateException;
 import demo.exception.ResourceDuplicateException;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+@SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping("/api/students")    
 public class StudentController {

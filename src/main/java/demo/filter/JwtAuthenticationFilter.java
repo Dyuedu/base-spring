@@ -9,8 +9,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.AccountStatusUserDetailsChecker;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -19,6 +21,7 @@ import java.io.IOException;
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtTokenProvider jwtTokenProvider;
+    private AccountStatusUserDetailsChecker accountStatusUserDetailsChecker = new AccountStatusUserDetailsChecker();
 
     public JwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider) {
         this.jwtTokenProvider = jwtTokenProvider;
@@ -31,6 +34,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String token = rawToken.substring(7);
             if (jwtTokenProvider.validateToken(token)){
                 Authentication authentication = jwtTokenProvider.getAuthentication(token);
+                accountStatusUserDetailsChecker.check((UserDetails) authentication.getPrincipal());
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         }
