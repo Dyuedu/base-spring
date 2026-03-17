@@ -7,4 +7,5 @@ public interface AccountService extends UserDetailsService {
     void saveAccount(LoginRequest loginRequest);
     void deleteAccount();
     void updateAccount();
+
 }

@@ -45,6 +45,7 @@ public class JwtTokenProvider {
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(token);
+
             return true;
         } catch (JwtException | IllegalArgumentException ex) {
             System.out.println("JWT không hợp lệ: {}" + ex.getMessage());
