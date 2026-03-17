@@ -40,7 +40,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public Account loadUserByUsername(String username) throws UsernameNotFoundException {
         return accountRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 }
