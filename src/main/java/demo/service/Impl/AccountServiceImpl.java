@@ -10,6 +10,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class AccountServiceImpl implements AccountService {
     private final AccountRepository accountRepository;
@@ -41,6 +43,14 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Account loadUserByUsername(String username) throws UsernameNotFoundException {
-        return accountRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        Optional<Account> account = null;
+        for (int i = 0; i < 3; i++) {
+            account = accountRepository.findByUsername(username);
+        }
+        if (account.isPresent()) {
+            return account.get();
+        } else {
+            throw new UsernameNotFoundException("User not found");
+        }
     }
 }

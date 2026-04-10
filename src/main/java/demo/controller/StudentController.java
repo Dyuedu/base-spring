@@ -6,6 +6,8 @@ import demo.exception.CodeDuplicateException;
 import demo.exception.EmailDuplicateException;
 import demo.exception.ResourceDuplicateException;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -27,7 +29,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @SecurityRequirement(name = "bearerAuth")
 @RestController
-@RequestMapping("/api/students")    
+@RequestMapping("/api/students")
+@EnableMethodSecurity
 public class StudentController {
     private final StudentService studentService;
 
@@ -57,6 +60,7 @@ public class StudentController {
         }
     }
 
+    @PreAuthorize( "hasAuthority('ADMIN')")
     @GetMapping()
     public ResponseEntity<ApiResponse<List<StudentResponse>>> getAllStudents() {
         List<StudentResponse> students = studentService.findAllStudents();
